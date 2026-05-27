@@ -1,7 +1,7 @@
 # StayStill (iOS)
 
 
-Last updated: 2026-05-27 17:11 GMT-0300
+Last updated: 2026-05-27 17:27 GMT-3
 
 ## Project purpose
 
@@ -11,8 +11,9 @@ Fullscreen image viewer that counter-rotates and optionally counter-translates t
 
 - SwiftUI app scaffold + core views implemented in `StayStill/`.
 - Motion stabilisation is implemented behind `#if os(iOS)` guards and is wired to UI toggles.
-- Photos are selected using PhotosUI and cycled via double-tap.
-- Overlay settings screen is always accessible by tapping the image; background tap closes it.
+- Photos are selected using PhotosUI; the picker now uses an unrestricted selection count (`nil`) and loads selected images into `PhotoSource`.
+- Single tap on the image opens the overlay via a high-priority tap gesture; tapping the dimmed background closes it.
+- Counter-rotation now updates immediately from device yaw without easing.
 - Red debug rectangle is removed from the image viewer.
 - iPad status bar (date/time/wifi/battery) is hidden for immersive fullscreen.
 - Xcode project exists in `StayStill/StayStill.xcodeproj`.
@@ -20,8 +21,8 @@ Fullscreen image viewer that counter-rotates and optionally counter-translates t
 
 ## Active focus
 
-- Ensure overlay and fullscreen behaviour are correct on iPad/iOS.
-- Make builds verifiably compile and run for the configured iOS Simulator environment.
+- Validate motion compensation on physical iPad hardware; the simulator cannot exercise live IMU translation.
+- Keep overlay, tap handling, and picker behaviour stable on iPadOS.
 
 ## Architecture overview
 
@@ -81,12 +82,15 @@ Data flow:
 
 - iOS simulator runtime availability affects `xcodebuild` verification in this environment.
 - Motion compensation axis mapping and translation mapping may require tuning for the intended “stable in the real world” effect.
-- Translation compensation is not visually effective with IMU-only (accelerometer/gyroscope) data; robust translation requires visual tracking or ARKit (not implemented).
+- Translation compensation is still IMU-only and approximate. It now uses a stronger gain, but it needs physical-device validation and tuning.
+- The simulator does not provide live device motion, so translation responsiveness cannot be fully validated there.
 
 ## Verification
 
 - Build succeeded for iPad Pro 11-inch (M5) simulator (arm64, iOS 26.5).
-- Overlay settings, fullscreen, and debug UI fixes verified by build.
+- Build succeeded after removing rotation easing.
+- Verified on simulator: single tap opens the overlay and background tap closes it.
+- Translation gain change is unverified on hardware; simulator does not provide real IMU motion.
 - `.DS_Store` ignore rule validated using `git --no-pager check-ignore -v .DS_Store nested/.DS_Store`.
 
-Last updated: 2026-05-27 16:40 GMT-0300
+Last updated: 2026-05-27 17:27 GMT-3

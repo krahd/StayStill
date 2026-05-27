@@ -36,7 +36,6 @@ final class MotionStabilizer: ObservableObject {
     private var lastTimestamp: TimeInterval?
 
     // Filtering gains
-    private let rotationSmoothing: Double = 0.08
     private let translationSmoothing: Float = 0.16
     private let translationGain: Float = 1200
     private let translationClamp: Float = 180
@@ -65,8 +64,7 @@ final class MotionStabilizer: ObservableObject {
                     let yaw = motion.attitude.yaw
                     if self.baselineYaw == nil { self.baselineYaw = yaw }
                     let dyaw = yaw - (self.baselineYaw ?? yaw)
-                    let targetDegrees = (dyaw * 180.0 / .pi)
-                    self.counterRotationDegrees += (targetDegrees - self.counterRotationDegrees) * self.rotationSmoothing
+                    self.counterRotationDegrees = (dyaw * 180.0 / .pi)
                 } else {
                     self.counterRotationDegrees = 0
                 }
