@@ -4,25 +4,19 @@ import SwiftUI
 import UIKit
 
 /// Fullscreen image viewer with:
-/// - two-finger pinch zoom + pan (SwiftUI gestures)
-/// - stabilization transforms (counter-rotation + translation offset)
+/// - two-finger pinch zoom (SwiftUI)
+/// - stabilization transform (counter-rotation)
 struct ImageStabilizedViewer: View {
     let image: UIImage
     let rotationEnabled: Bool
-    let translationEnabled: Bool
 
     let counterRotationDegrees: Double
-    let translationOffset: SIMD2<Float>
-
 
     let initialZoom: CGFloat
     let onZoomChanged: (CGFloat) -> Void
 
     @State private var baseScale: CGFloat = 1
     @State private var gestureScale: CGFloat = 1
-    @State private var baseOffset: CGSize = .zero
-    @State private var gestureOffset: CGSize = .zero
-    private let panMinimumDistance: CGFloat = 10
 
     var body: some View {
         GeometryReader { geo in
@@ -38,16 +32,10 @@ struct ImageStabilizedViewer: View {
                     height: image.size.height * scale
                 )
                 .scaleEffect(clampedScale)
-                .offset(
-                    x: baseOffset.width + gestureOffset.width + (translationEnabled ? CGFloat(translationOffset.x) : 0),
-                    y: baseOffset.height + gestureOffset.height + (translationEnabled ? CGFloat(translationOffset.y) : 0)
-                )
                 .rotationEffect(.degrees(rotationEnabled ? counterRotationDegrees : 0))
                 .contentShape(Rectangle())
                 .gesture(zoomGesture)
-                .simultaneousGesture(panGesture)
                 .ignoresSafeArea(edges: .all)
-                // Removed debug border
         }
         .onAppear {
             if baseScale == 1 {
@@ -71,26 +59,6 @@ struct ImageStabilizedViewer: View {
                 gestureScale = 1
                 onZoomChanged(baseScale)
             }
-    }
-
-    private var panGesture: some Gesture {
-        DragGesture(minimumDistance: panMinimumDistance)
-            .onChanged { value in
-                gestureOffset = value.translation
-            }
-            .onEnded { _ in
-                baseOffset = CGSize(
-                    width: baseOffset.width + gestureOffset.width,
-                    height: baseOffset.height + gestureOffset.height
-                )
-                gestureOffset = .zero
-            }
-    }
-}
-
-private extension View {
-    func translationEffect(_ size: CGSize) -> some View {
-        offset(x: size.width, y: size.height)
     }
 }
 

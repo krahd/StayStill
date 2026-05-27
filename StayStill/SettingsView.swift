@@ -2,14 +2,12 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var rotationEnabled: Bool
-    @Binding var translationEnabled: Bool
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     Toggle("Rotation compensation", isOn: $rotationEnabled)
-                    Toggle("Translation compensation", isOn: $translationEnabled)
                 }
 
                 Section {

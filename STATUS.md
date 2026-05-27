@@ -1,96 +1,81 @@
 # StayStill (iOS)
 
-
-Last updated: 2026-05-27 17:27 GMT-3
+Last updated: 2026-05-27 18:14 GMT-3
 
 ## Project purpose
 
-Fullscreen image viewer that counter-rotates and optionally counter-translates the displayed image to appear stable in the real world.
+Fullscreen iOS image viewer that counter-rotates the displayed image to appear stable in the real world.
 
-## Current implementation state
+## Current state
 
-- SwiftUI app scaffold + core views implemented in `StayStill/`.
-- Motion stabilisation is implemented behind `#if os(iOS)` guards and is wired to UI toggles.
-- Photos are selected using PhotosUI; the picker now uses an unrestricted selection count (`nil`) and loads selected images into `PhotoSource`.
-- Single tap on the image opens the overlay via a high-priority tap gesture; tapping the dimmed background closes it.
-- Counter-rotation now updates immediately from device yaw without easing.
-- Red debug rectangle is removed from the image viewer.
-- iPad status bar (date/time/wifi/battery) is hidden for immersive fullscreen.
-- Xcode project exists in `StayStill/StayStill.xcodeproj`.
-- Repository-level `.gitignore` now ignores all `.DS_Store` files.
+- SwiftUI app scaffold and core views live in `StayStill/`.
+- The app uses PhotosUI to load images into `PhotoSource`.
+- The viewer supports pinch zoom and counter-rotation only.
+- Overlay controls provide rotation toggling, image loading, and close actions.
+- Rotation compensation is driven by `MotionStabilizer` via device yaw.
+- `README.md` contains the user-facing usage summary and the "as is" disclaimer.
+- `LICENSE.md` contains the MIT licence text.
+- The Xcode project is `StayStill/StayStill.xcodeproj`.
 
-## Active focus
+## Key files
 
-- Validate motion compensation on physical iPad hardware; the simulator cannot exercise live IMU translation.
-- Keep overlay, tap handling, and picker behaviour stable on iPadOS.
+- `StayStill/ContentView.swift`: app shell, overlay, and image picker flow.
+- `StayStill/MotionStabilizer.swift`: yaw-based rotation compensation.
+- `StayStill/ImageStabilizedViewer.swift`: image display, zoom, and counter-rotation.
+- `StayStill/SettingsView.swift`: rotation setting screen.
+- `README.md`: usage and disclaimer.
+- `LICENSE.md`: licence text.
 
-## Architecture overview
+## Current notes
 
-Data flow:
+- The app is configured for iOS simulator and device runs.
+- Yaw compensation may still need hardware tuning if the rotation feel changes.
+- The simulator does not provide live device motion.
 
-- `ContentView` hosts:
-  - photo selection (`PhotoPickerView`/PhotosUI)
-  - `ImageStabilizedViewer` for display
-  - `SettingsView` for toggles
-- `MotionStabilizer` publishes motion-derived offsets/angles.
-- `PhotoSource` stores selected images and manages cycling.
+### Current architecture
 
-
-### Architecture diagram (inline SVG)
-
-<svg xmlns="http://www.w3.org/2000/svg" width="980" height="360" viewBox="0 0 980 360">
-  <title>StayStill architecture</title>
-  <desc>SwiftUI view hierarchy and data flow.</desc>
-  <rect x="20" y="20" width="300" height="130" fill="#f3f3f3" stroke="#333"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="320" viewBox="0 0 980 320">
+  <title>StayStill current architecture</title>
+  <desc>Current file-level structure of the app.</desc>
+  <rect x="20" y="20" width="300" height="120" fill="#f3f3f3" stroke="#333"/>
   <text x="35" y="55" font-family="monospace" font-size="14">ContentView.swift</text>
-  <text x="35" y="80" font-family="monospace" font-size="12">• fullscreen layout</text>
-  <text x="35" y="100" font-family="monospace" font-size="12">• tap gestures</text>
-  <text x="35" y="120" font-family="monospace" font-size="12">• presents Settings/About</text>
+  <text x="35" y="80" font-family="monospace" font-size="12">• picker</text>
+  <text x="35" y="100" font-family="monospace" font-size="12">• overlay controls</text>
+  <text x="35" y="120" font-family="monospace" font-size="12">• image selection flow</text>
 
-  <rect x="350" y="20" width="300" height="130" fill="#f3f3f3" stroke="#333"/>
-  <text x="365" y="55" font-family="monospace" font-size="14">PhotoSource.swift</text>
-  <text x="365" y="80" font-family="monospace" font-size="12">• selected [UIImage]</text>
-  <text x="365" y="100" font-family="monospace" font-size="12">• current index</text>
-  <text x="365" y="120" font-family="monospace" font-size="12">• next() cycling</text>
+  <rect x="350" y="20" width="290" height="120" fill="#f3f3f3" stroke="#333"/>
+  <text x="365" y="55" font-family="monospace" font-size="14">MotionStabilizer.swift</text>
+  <text x="365" y="80" font-family="monospace" font-size="12">• CoreMotion yaw</text>
+  <text x="365" y="100" font-family="monospace" font-size="12">• rotation only</text>
+  <text x="365" y="120" font-family="monospace" font-size="12">• publishes degrees</text>
 
-  <rect x="680" y="20" width="280" height="130" fill="#f3f3f3" stroke="#333"/>
-  <text x="695" y="55" font-family="monospace" font-size="14">MotionStabilizer.swift</text>
-  <text x="695" y="80" font-family="monospace" font-size="12">• CMMotionManager</text>
-  <text x="695" y="100" font-family="monospace" font-size="12">• publishes offsets</text>
-  <text x="695" y="120" font-family="monospace" font-size="12">• rotation/translation</text>
+  <rect x="670" y="20" width="290" height="120" fill="#f3f3f3" stroke="#333"/>
+  <text x="685" y="55" font-family="monospace" font-size="14">ImageStabilizedViewer.swift</text>
+  <text x="685" y="80" font-family="monospace" font-size="12">• pinch zoom</text>
+  <text x="685" y="100" font-family="monospace" font-size="12">• counter-rotation</text>
+  <text x="685" y="120" font-family="monospace" font-size="12">• fullscreen display</text>
 
-  <rect x="20" y="180" width="420" height="160" fill="#f3f3f3" stroke="#333"/>
-  <text x="35" y="215" font-family="monospace" font-size="14">ImageStabilizedViewer.swift</text>
-  <text x="35" y="240" font-family="monospace" font-size="12">• zoom/pan for 2-finger gestures</text>
-  <text x="35" y="260" font-family="monospace" font-size="12">• applies counter-transform(s)</text>
-  <text x="35" y="280" font-family="monospace" font-size="12">• iOS-only implementation</text>
+  <rect x="20" y="170" width="300" height="120" fill="#f3f3f3" stroke="#333"/>
+  <text x="35" y="205" font-family="monospace" font-size="14">SettingsView.swift</text>
+  <text x="35" y="230" font-family="monospace" font-size="12">• rotation toggle</text>
+  <text x="35" y="250" font-family="monospace" font-size="12">• settings form</text>
 
-  <rect x="470" y="180" width="470" height="160" fill="#f3f3f3" stroke="#333"/>
-  <text x="485" y="215" font-family="monospace" font-size="14">Settings/About Overlay</text>
-  <text x="485" y="240" font-family="monospace" font-size="12">• toggles: rotation + translation</text>
-  <text x="485" y="260" font-family="monospace" font-size="12">• about text required</text>
-  <text x="485" y="280" font-family="monospace" font-size="12">• hooks into MotionStabilizer</text>
+  <rect x="350" y="170" width="610" height="120" fill="#f3f3f3" stroke="#333"/>
+  <text x="365" y="205" font-family="monospace" font-size="14">README.md + LICENSE.md + STATUS.md</text>
+  <text x="365" y="230" font-family="monospace" font-size="12">• usage and disclaimer</text>
+  <text x="365" y="250" font-family="monospace" font-size="12">• MIT licence</text>
 
-  <line x1="320" y1="85" x2="350" y2="85" stroke="#333"/>
-  <line x1="500" y1="150" x2="540" y2="180" stroke="#333"/>
-  <line x1="680" y1="85" x2="680" y2="260" stroke="#333"/>
+  <line x1="320" y1="80" x2="350" y2="80" stroke="#333"/>
+  <line x1="540" y1="140" x2="540" y2="170" stroke="#333"/>
+  <line x1="525" y1="140" x2="170" y2="170" stroke="#333"/>
+  <line x1="805" y1="140" x2="670" y2="170" stroke="#333"/>
 </svg>
 
-<p><em>Diagram: SwiftUI view hierarchy and data flow. Boxes are files, arrows are data/prop flow. If you use a screen reader, skip the SVG and refer to the text sections below for architecture details.</em></p>
+<p><em>Diagram: current file-level architecture. Boxes are tracked files, arrows show the main UI and data flow.</em></p>
 
-## Known issues, risks, and limitations
+## Known limitations
 
-- iOS simulator runtime availability affects `xcodebuild` verification in this environment.
-- Motion compensation axis mapping and translation mapping may require tuning for the intended “stable in the real world” effect.
-- Translation compensation is still IMU-only and approximate. It now uses a stronger gain, but it needs physical-device validation and tuning.
-- The simulator does not provide live device motion, so translation responsiveness cannot be fully validated there.
+- The simulator does not exercise live device motion.
+- Yaw compensation may need hardware tuning.
 
-## Verification
-
-- Build succeeded for iPad Pro 11-inch (M5) simulator (arm64, iOS 26.5).
-- Build succeeded after removing rotation easing.
-- Verified on simulator: single tap opens the overlay and background tap closes it.
-- Translation gain change is unverified on hardware; simulator does not provide real IMU motion.
-- `.DS_Store` ignore rule validated using `git --no-pager check-ignore -v .DS_Store nested/.DS_Store`.
-
-Last updated: 2026-05-27 17:27 GMT-3
+Last updated: 2026-05-27 18:14 GMT-3

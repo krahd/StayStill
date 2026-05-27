@@ -2,7 +2,6 @@ import SwiftUI
 
 #if os(iOS)
 import PhotosUI
-import CoreMotion
 
 struct ContentView: View {
     @StateObject private var photoSource = PhotoSource()
@@ -19,9 +18,7 @@ struct ContentView: View {
                 ImageStabilizedViewer(
                     image: uiImage,
                     rotationEnabled: motion.rotationEnabled,
-                    translationEnabled: motion.translationEnabled,
                     counterRotationDegrees: motion.counterRotationDegrees,
-                    translationOffset: motion.translationOffset,
                     initialZoom: photoSource.lastZoom,
                     onZoomChanged: { z in photoSource.setLastZoom(z) }
                 )
@@ -67,15 +64,16 @@ struct ContentView: View {
                                 Label(motion.rotationEnabled ? "Rotation: On" : "Rotation: Off", systemImage: motion.rotationEnabled ? "gyroscope" : "gyroscope")
                             }
                             .foregroundStyle(.white)
-                            Button(action: { motion.translationEnabled.toggle() }) {
-                                Label(motion.translationEnabled ? "Translation: On" : "Translation: Off", systemImage: motion.translationEnabled ? "arrow.up.and.down.and.arrow.left.and.right" : "arrow.up.and.down.and.arrow.left.and.right")
-                            }
-                            .foregroundStyle(.white)
                         }
                         HStack(spacing: 24) {
-                            Button(action: { photoSource.next(); showOverlay = false }) {
-                                Label("Next Image", systemImage: "photo")
+                            PhotosPicker(
+                                selection: $selection,
+                                maxSelectionCount: nil,
+                                matching: .images
+                            ) {
+                                Label("Load Image", systemImage: "photo")
                             }
+                            .buttonStyle(.plain)
                             .foregroundStyle(.white)
                             Button(action: { showOverlay = false }) {
                                 Label("Close", systemImage: "xmark.circle")
@@ -113,8 +111,11 @@ struct ContentView: View {
         }
 
         await MainActor.run {
+            guard !loaded.isEmpty else { return }
             photoSource.setImages(loaded)
             motion.startIfNeeded()
+            showOverlay = false
+            selection = []
         }
     }
 }
