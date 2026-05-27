@@ -22,6 +22,7 @@ struct ImageStabilizedViewer: View {
     @State private var gestureScale: CGFloat = 1
     @State private var baseOffset: CGSize = .zero
     @State private var gestureOffset: CGSize = .zero
+    private let panMinimumDistance: CGFloat = 10
 
     var body: some View {
         GeometryReader { geo in
@@ -73,7 +74,7 @@ struct ImageStabilizedViewer: View {
     }
 
     private var panGesture: some Gesture {
-        DragGesture(minimumDistance: 0)
+        DragGesture(minimumDistance: panMinimumDistance)
             .onChanged { value in
                 gestureOffset = value.translation
             }

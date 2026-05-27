@@ -37,10 +37,17 @@ final class MotionStabilizer: ObservableObject {
 
     // Filtering gains
     private let rotationSmoothing: Double = 0.08
-    private let translationSmoothing: Float = 0.12
+    private let translationSmoothing: Float = 0.16
+    private let translationGain: Float = 1200
+    private let translationClamp: Float = 180
 
     func startIfNeeded() {
-        guard rotationEnabled || translationEnabled else { return }
+        guard rotationEnabled || translationEnabled else {
+            motionManager.stopDeviceMotionUpdates()
+            motionManager.stopAccelerometerUpdates()
+            resetMotionState()
+            return
+        }
 
         if motionManager.isAccelerometerActive == false {
             motionManager.accelerometerUpdateInterval = 1.0 / 60.0
@@ -48,6 +55,7 @@ final class MotionStabilizer: ObservableObject {
         }
 
         if motionManager.isDeviceMotionActive == false {
+            resetMotionState()
             motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
             motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: .main) { [weak self] motion, _ in
                 guard let self, let motion else { return }
@@ -57,13 +65,14 @@ final class MotionStabilizer: ObservableObject {
                     let yaw = motion.attitude.yaw
                     if self.baselineYaw == nil { self.baselineYaw = yaw }
                     let dyaw = yaw - (self.baselineYaw ?? yaw)
-                    // Invert direction to match user expectation
                     let targetDegrees = (dyaw * 180.0 / .pi)
-                    self.counterRotationDegrees = targetDegrees
+                    self.counterRotationDegrees += (targetDegrees - self.counterRotationDegrees) * self.rotationSmoothing
+                } else {
+                    self.counterRotationDegrees = 0
                 }
 
                 // Translation compensation (planar offset)
-                // NOTE: This approach is very limited and will drift. For robust translation, use visual tracking or ARKit.
+                // NOTE: This still uses IMU-derived acceleration, so it is approximate.
                 if self.translationEnabled {
                     let accel = motion.userAcceleration
                     let ax = Float(accel.x)
@@ -73,10 +82,15 @@ final class MotionStabilizer: ObservableObject {
                     if let lastT = self.lastTimestamp {
                         let dt = Float(max(0.001, now - lastT))
                         self.lastVelocity += SIMD2<Float>(ax, ay) * dt
-                        let target = self.lastVelocity * 0.15
-                        self.translationOffset = target
+                        let target = -self.lastVelocity * self.translationGain
+                        self.translationOffset += (target - self.translationOffset) * self.translationSmoothing
+                        self.translationOffset = self.clampedTranslationOffset(self.translationOffset)
                     }
                     self.lastTimestamp = now
+                } else {
+                    self.lastVelocity = .init(0, 0)
+                    self.lastTimestamp = nil
+                    self.translationOffset = .init(0, 0)
                 }
             }
         }
@@ -95,6 +109,13 @@ final class MotionStabilizer: ObservableObject {
         lastTimestamp = nil
         counterRotationDegrees = 0
         translationOffset = .init(0, 0)
+    }
+
+    private func clampedTranslationOffset(_ value: SIMD2<Float>) -> SIMD2<Float> {
+        SIMD2<Float>(
+            max(-translationClamp, min(translationClamp, value.x)),
+            max(-translationClamp, min(translationClamp, value.y))
+        )
     }
 }
 

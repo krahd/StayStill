@@ -26,7 +26,7 @@ struct ContentView: View {
                     onZoomChanged: { z in photoSource.setLastZoom(z) }
                 )
                 .contentShape(Rectangle())
-                .onTapGesture { showOverlay = true }
+                .highPriorityGesture(TapGesture().onEnded { showOverlay = true })
             } else {
                 VStack(spacing: 16) {
                     Text("StayStill")
@@ -37,7 +37,7 @@ struct ContentView: View {
 
                     PhotosPicker(
                         selection: $selection,
-                        maxSelectionCount: 0, // allow multiple
+                        maxSelectionCount: nil,
                         matching: .images
                     ) {
                         Text("Pick Photos")

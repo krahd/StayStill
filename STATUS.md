@@ -1,7 +1,7 @@
 # StayStill (iOS)
 
 
-Last updated: 2026-05-27 16:40 GMT-0300
+Last updated: 2026-05-27 17:11 GMT-0300
 
 ## Project purpose
 
@@ -16,6 +16,7 @@ Fullscreen image viewer that counter-rotates and optionally counter-translates t
 - Red debug rectangle is removed from the image viewer.
 - iPad status bar (date/time/wifi/battery) is hidden for immersive fullscreen.
 - Xcode project exists in `StayStill/StayStill.xcodeproj`.
+- Repository-level `.gitignore` now ignores all `.DS_Store` files.
 
 ## Active focus
 
@@ -86,5 +87,6 @@ Data flow:
 
 - Build succeeded for iPad Pro 11-inch (M5) simulator (arm64, iOS 26.5).
 - Overlay settings, fullscreen, and debug UI fixes verified by build.
+- `.DS_Store` ignore rule validated using `git --no-pager check-ignore -v .DS_Store nested/.DS_Store`.
 
 Last updated: 2026-05-27 16:40 GMT-0300
