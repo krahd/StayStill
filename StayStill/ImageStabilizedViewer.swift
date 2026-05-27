@@ -21,9 +21,9 @@ struct ImageStabilizedViewer: View {
     var body: some View {
         GeometryReader { geo in
             let available = geo.size
-            let screenDiagonal = sqrt(pow(available.width, 2) + pow(available.height, 2))
-            let imageDiagonal = sqrt(pow(image.size.width, 2) + pow(image.size.height, 2))
-            let scale = screenDiagonal / imageDiagonal
+            let widthScale = available.width / image.size.width
+            let heightScale = available.height / image.size.height
+            let scale = max(widthScale, heightScale)
 
             Image(uiImage: image)
                 .resizable()

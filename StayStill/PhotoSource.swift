@@ -7,22 +7,21 @@ import UIKit
 final class PhotoSource: ObservableObject {
     @Published private(set) var images: [UIImage] = []
     @Published private(set) var selectedIndex: Int = 0
+    @Published private(set) var imageVersion: Int = 0
 
     var hasImages: Bool { !images.isEmpty }
-
-    private let lastImageKey = "StayStill_LastImagePath"
-    private let lastZoomKey = "StayStill_LastImageZoom"
 
     @Published var lastZoom: CGFloat = 1
 
     init() {
         loadLastImage()
-        loadLastZoom()
     }
 
     func setImages(_ newImages: [UIImage]) {
         images = newImages
         selectedIndex = 0
+        imageVersion += 1
+        setLastZoom(1)
         if let first = newImages.first {
             saveLastImage(first)
         }
@@ -30,7 +29,6 @@ final class PhotoSource: ObservableObject {
 
     func setLastZoom(_ zoom: CGFloat) {
         lastZoom = zoom
-        UserDefaults.standard.set(Double(zoom), forKey: lastZoomKey)
     }
 
     func next() {
@@ -49,7 +47,6 @@ final class PhotoSource: ObservableObject {
         let url = Self.lastImageURL()
         do {
             try data.write(to: url)
-            UserDefaults.standard.set(url.path, forKey: lastImageKey)
         } catch {
             print("Failed to save last image: \(error)")
         }
@@ -62,11 +59,7 @@ final class PhotoSource: ObservableObject {
               let image = UIImage(data: data) else { return }
         images = [image]
         selectedIndex = 0
-    }
-
-    private func loadLastZoom() {
-        let z = UserDefaults.standard.double(forKey: lastZoomKey)
-        if z > 0 { lastZoom = CGFloat(z) }
+        lastZoom = 1
     }
 
     private static func lastImageURL() -> URL {

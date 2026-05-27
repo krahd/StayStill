@@ -22,6 +22,7 @@ struct ContentView: View {
                     initialZoom: photoSource.lastZoom,
                     onZoomChanged: { z in photoSource.setLastZoom(z) }
                 )
+                .id(photoSource.imageVersion)
                 .contentShape(Rectangle())
                 .highPriorityGesture(TapGesture().onEnded { showOverlay = true })
             } else {
@@ -59,27 +60,15 @@ struct ContentView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                        HStack(spacing: 24) {
-                            Button(action: { motion.rotationEnabled.toggle() }) {
-                                Label(motion.rotationEnabled ? "Rotation: On" : "Rotation: Off", systemImage: motion.rotationEnabled ? "gyroscope" : "gyroscope")
-                            }
-                            .foregroundStyle(.white)
+                        PhotosPicker(
+                            selection: $selection,
+                            maxSelectionCount: nil,
+                            matching: .images
+                        ) {
+                            Label("Load New Image", systemImage: "photo")
                         }
-                        HStack(spacing: 24) {
-                            PhotosPicker(
-                                selection: $selection,
-                                maxSelectionCount: nil,
-                                matching: .images
-                            ) {
-                                Label("Load Image", systemImage: "photo")
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(.white)
-                            Button(action: { showOverlay = false }) {
-                                Label("Close", systemImage: "xmark.circle")
-                            }
-                            .foregroundStyle(.white)
-                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.white)
                     }
                     .padding()
                     .background(Color.black.opacity(0.8))

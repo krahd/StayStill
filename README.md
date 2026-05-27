@@ -9,8 +9,8 @@ This project is provided as is, without warranty.
 2. Tap "Pick Photos" to select images from your library.
 3. Rotate your device to see stabilization effects.
 4. Pinch to zoom.
-5. Single-tap to open the overlay with settings and image loading controls.
-6. Tap "Load Image" to replace the currently displayed image.
+5. Single-tap to open the overlay with image loading controls.
+6. Tap "Load New Image" to replace the currently displayed image.
 
 ## Build
 
