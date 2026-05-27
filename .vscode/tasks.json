@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build StayStill iOS app",
+			"type": "shell",
+			"command": "xcodebuild -project StayStill/StayStill.xcodeproj -scheme StayStill -destination 'platform=iOS Simulator,name=iPad (10th generation)' build",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Build StayStill iOS app (iPad Pro 11-inch M5)",
+			"type": "shell",
+			"command": "xcodebuild -project StayStill/StayStill.xcodeproj -scheme StayStill -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M5)' build",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}

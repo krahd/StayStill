@@ -1,0 +1,127 @@
+import SwiftUI
+
+#if os(iOS)
+import PhotosUI
+import CoreMotion
+
+struct ContentView: View {
+    @StateObject private var photoSource = PhotoSource()
+    @StateObject private var motion = MotionStabilizer()
+
+    @State private var showOverlay = false
+    @State private var selection: [PhotosPickerItem] = []
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            if let uiImage = photoSource.currentImage() {
+                ImageStabilizedViewer(
+                    image: uiImage,
+                    rotationEnabled: motion.rotationEnabled,
+                    translationEnabled: motion.translationEnabled,
+                    counterRotationDegrees: motion.counterRotationDegrees,
+                    translationOffset: motion.translationOffset,
+                    initialZoom: photoSource.lastZoom,
+                    onZoomChanged: { z in photoSource.setLastZoom(z) }
+                )
+                .contentShape(Rectangle())
+                .onTapGesture { showOverlay = true }
+            } else {
+                VStack(spacing: 16) {
+                    Text("StayStill")
+                        .font(.largeTitle)
+                        .foregroundStyle(.white)
+                    Text("Pick a photo to start.")
+                        .foregroundStyle(.white.opacity(0.8))
+
+                    PhotosPicker(
+                        selection: $selection,
+                        maxSelectionCount: 0, // allow multiple
+                        matching: .images
+                    ) {
+                        Text("Pick Photos")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+            }
+
+            // Overlay always accessible
+            if showOverlay {
+                ZStack {
+                    Color.black.opacity(0.7)
+                        .ignoresSafeArea()
+                        .onTapGesture { showOverlay = false }
+                    VStack(spacing: 24) {
+                        Text("StayStill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.white)
+                        Text("StayStill is an experiment by Tomas Laurenzo (tomas@laurenzo.net)")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        HStack(spacing: 24) {
+                            Button(action: { motion.rotationEnabled.toggle() }) {
+                                Label(motion.rotationEnabled ? "Rotation: On" : "Rotation: Off", systemImage: motion.rotationEnabled ? "gyroscope" : "gyroscope")
+                            }
+                            .foregroundStyle(.white)
+                            Button(action: { motion.translationEnabled.toggle() }) {
+                                Label(motion.translationEnabled ? "Translation: On" : "Translation: Off", systemImage: motion.translationEnabled ? "arrow.up.and.down.and.arrow.left.and.right" : "arrow.up.and.down.and.arrow.left.and.right")
+                            }
+                            .foregroundStyle(.white)
+                        }
+                        HStack(spacing: 24) {
+                            Button(action: { photoSource.next(); showOverlay = false }) {
+                                Label("Next Image", systemImage: "photo")
+                            }
+                            .foregroundStyle(.white)
+                            Button(action: { showOverlay = false }) {
+                                Label("Close", systemImage: "xmark.circle")
+                            }
+                            .foregroundStyle(.white)
+                        }
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(24)
+                    .padding(40)
+                    .onTapGesture { }
+                }
+            }
+        }
+        .onAppear {
+            motion.startIfNeeded()
+        }
+        .onChange(of: selection) { _, newValue in
+            Task { await loadSelectedImages(from: newValue) }
+        }
+    }
+
+    private func loadSelectedImages(from items: [PhotosPickerItem]) async {
+        guard !items.isEmpty else { return }
+
+        var loaded: [UIImage] = []
+        loaded.reserveCapacity(items.count)
+
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let uiImage = UIImage(data: data) {
+                loaded.append(uiImage)
+            }
+        }
+
+        await MainActor.run {
+            photoSource.setImages(loaded)
+            motion.startIfNeeded()
+        }
+    }
+}
+
+#else
+// Non-iOS stub so the project can still compile even if Xcode targets macOS by mistake.
+struct ContentView: View {
+    var body: some View { Text("StayStill is an iOS app.") }
+}
+#endif
