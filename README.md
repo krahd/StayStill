@@ -16,4 +16,17 @@ This project is provided as is, without warranty.
 
 Open `StayStill/StayStill.xcodeproj` in Xcode and run on an iOS device or simulator.
 
-[Tomas Laurenzo](mailto:tomas@laurenzo.net)
+## Architecture
+
+![Data flow: PhotoSource → ContentView → ImageStabilizedViewer; MotionStabilizer feeds counter-rotation into ContentView.](docs/status-architecture.svg)
+
+Read [STATUS.md](STATUS.md) for more implementation details.
+
+## License
+
+MIT: [LICENSE.md](LICENSE.md)
+
+## Disclaimer
+
+All this is 'AS IS'.
+

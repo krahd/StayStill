@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" width="520" height="260" font-family="monospace" font-size="13">
+  <!-- PhotoSource -->
+  <rect x="20" y="100" width="130" height="44" rx="6" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+  <text x="85" y="127" text-anchor="middle" fill="#e8f4ff">PhotoSource</text>
+
+  <!-- ContentView (center) -->
+  <rect x="195" y="100" width="130" height="44" rx="6" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+  <text x="260" y="127" text-anchor="middle" fill="#e8f4ff">ContentView</text>
+
+  <!-- ImageStabilizedViewer -->
+  <rect x="370" y="100" width="130" height="44" rx="6" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+  <text x="435" y="118" text-anchor="middle" fill="#e8f4ff">ImageStabilized</text>
+  <text x="435" y="135" text-anchor="middle" fill="#e8f4ff">Viewer</text>
+
+  <!-- MotionStabilizer (below ContentView) -->
+  <rect x="195" y="196" width="130" height="44" rx="6" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+  <text x="260" y="214" text-anchor="middle" fill="#e8f4ff">Motion</text>
+  <text x="260" y="231" text-anchor="middle" fill="#e8f4ff">Stabilizer</text>
+
+  <!-- Arrow: PhotoSource → ContentView -->
+  <line x1="150" y1="122" x2="193" y2="122" stroke="#4a90d9" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="171" y="112" text-anchor="middle" fill="#8ab8e8" font-size="11">image</text>
+
+  <!-- Arrow: ContentView → ImageStabilizedViewer -->
+  <line x1="325" y1="122" x2="368" y2="122" stroke="#4a90d9" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="346" y="112" text-anchor="middle" fill="#8ab8e8" font-size="11">image +</text>
+  <text x="346" y="100" text-anchor="middle" fill="#8ab8e8" font-size="11">motion</text>
+
+  <!-- Arrow: MotionStabilizer → ContentView -->
+  <line x1="260" y1="196" x2="260" y2="146" stroke="#4a90d9" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="310" y="178" text-anchor="middle" fill="#8ab8e8" font-size="11">yaw /</text>
+  <text x="317" y="191" text-anchor="middle" fill="#8ab8e8" font-size="11">counter-rot</text>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#4a90d9"/>
+    </marker>
+  </defs>
+</svg>
